@@ -1,5 +1,5 @@
 import streamlit as st
-from streamlit_lottie import st_lottie
+#from streamlit_lottie import st_lottie
 import requests
 import json
 
@@ -10,7 +10,7 @@ def load_lottiefile(path:str):
     with open (path, "r") as f:
         return json.load(f)
 
-load_file=load_lottiefile("hello.json")
+#load_file=load_lottiefile("hello.json")
 #load_2nd=load_lottiefile("/Users/Dhrobe/Desktop/Ujjal/2nd.json")
 
 st_lottie(load_file)
