@@ -11,7 +11,7 @@ def load_lottiefile(path:str):
         return json.load(f)
 
 load_file=load_lottiefile("/Users/Dhrobe/Desktop/Ujjal/hello.json")
-load_2nd=load_lottiefile("/Users/Dhrobe/Desktop/Ujjal/2nd.json")
+#load_2nd=load_lottiefile("/Users/Dhrobe/Desktop/Ujjal/2nd.json")
 
 st_lottie(load_file)
         
