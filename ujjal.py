@@ -13,7 +13,7 @@ def load_lottiefile(path:str):
 #load_file=load_lottiefile("hello.json")
 #load_2nd=load_lottiefile("/Users/Dhrobe/Desktop/Ujjal/2nd.json")
 
-st_lottie(load_file)
+#st_lottie(load_file)
         
     
 # Load the user data from the JSON file
@@ -27,7 +27,8 @@ def check_credentials(username, password):
     return False
 
 def second_page():
-    st_lottie(load_2nd)
+    print('hello')
+    #st_lottie(load_2nd)
     
 
 def login():
