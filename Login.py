@@ -15,34 +15,24 @@ load_file=load_lottiefile("/app/ujjal-py/hello.json")
 
 st_lottie(load_file)
         
-    
-# Load the user data from the JSON file
-with open("users.json") as f:
-    user_data = json.load(f)
 
-def check_credentials(username, password):
-    for user in user_data:
-        if user["username"] == username and user["password"] == password:
-            return True
-    return False
+def authenticate(username,password):
+    if username=='ziead' and password=='123ziead':
+        return True
+    elif username=='dhrobe' and password=='123dhrobe':
+        return True
+    else:
+        return False
+st.sidebar.title("Login")
 
-def second_page():
-    print('hello')
-    #st_lottie(load_2nd)
-    
+username=st.sidebar.text_input("Enter Username")
+password=st.sidebar.text_input("Enter Password")
 
-def login():
-    st.header("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if check_credentials(username, password):
-            st.success(second_page)
-        else:
-            st.error("Invalid username or password")
-
-# Render the login form
-st.sidebar.header(login())
+if st.sidebar.button("Login"):
+    if authenticate(username,password):
+        st.sidebar.success("Logged in as {}".format(username))
+    else:
+        st.sidebar.error("Incorrect username or password")
 
 
 # Render the appropriate page based on the user's login status
