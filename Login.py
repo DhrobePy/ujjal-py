@@ -11,12 +11,12 @@ def load_lottiefile(path:str):
         return json.load(f)
 
 load_file=load_lottiefile("/app/ujjal-py/hello.json")
-load_2nd=load_lottiefile("/app/ujjal-py/2nd.json")
+#load_2nd=load_lottiefile("/app/ujjal-py/2nd.json")
 
 st_lottie(load_file)
         
-def second_page():
-    st.write("You Have logged In as {}",format(username)
+#def second_page():
+    #st.write("You Have logged In as {}",format(username)
 
              
 def authenticate(username,password):
@@ -33,7 +33,7 @@ password=st.sidebar.text_input("Enter Password")
 
 if st.sidebar.button("Login"):
     if authenticate(username,password):
-        st.sidebar.success(second_page())
+        st.sidebar.success("Logged in as {}".format(username))
     else:
         st.sidebar.error("Incorrect username or password")
 
