@@ -42,7 +42,7 @@ def login():
             st.error("Invalid username or password")
 
 # Render the login form
-login()
+st.sidebar.header(login())
 
 
 # Render the appropriate page based on the user's login status
