@@ -18,7 +18,8 @@ st_lottie(load_file)
 def second_page():
     st.write("You Have logged In as {}",format(username)
     #st_lottie(load_2nd)
-    
+
+             
 def authenticate(username,password):
     if username=='ziead' and password=='123ziead':
         return True
