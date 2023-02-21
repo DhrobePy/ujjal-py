@@ -33,7 +33,7 @@ password=st.sidebar.text_input("Enter Password")
 
 if st.sidebar.button("Login"):
     if authenticate(username,password):
-        st.sidebar.success("Logged in as {}".format(username))
+        st.sidebar.success(st.write("Logged in as {}".format(username)))
     else:
         st.sidebar.error("Incorrect username or password")
 
