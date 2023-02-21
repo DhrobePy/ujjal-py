@@ -10,5 +10,5 @@ def load_lottiefile(path:str):
     with open (path,"r")as f:
         return json.load(f)
 
-welcome_animation2=load_lottiefile("/pages/2nd.json")
+welcome_animation2=load_lottiefile("/app/ujjal-py/pages/2nd.json")
 st_lottie(welcome_animation2)
