@@ -1,10 +1,10 @@
 import streamlit as st
-#from streamlit_lottie import st_lottie
+from streamlit_lottie import st_lottie
 import requests
 import json
 
 
-st.title(' .........Hello!!!!.......')
+st.title(' Welcome to Ujjal Flour Mills Dashboard')
 
 def load_lottiefile(path:str):
     with open (path, "r") as f:
