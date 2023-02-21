@@ -10,10 +10,10 @@ def load_lottiefile(path:str):
     with open (path, "r") as f:
         return json.load(f)
 
-#load_file=load_lottiefile("hello.json")
+load_file=load_lottiefile("/app/ujjal-py/hello.json")
 #load_2nd=load_lottiefile("/Users/Dhrobe/Desktop/Ujjal/2nd.json")
 
-#st_lottie(load_file)
+st_lottie(load_file)
         
     
 # Load the user data from the JSON file
