@@ -3,8 +3,8 @@ import sqlite3
 
 
 # Define username and password
-CORRECT_USERNAME = 'myusername'
-CORRECT_PASSWORD = 'mypassword'
+CORRECT_USERNAME = 'Ujjaladmin'
+CORRECT_PASSWORD = 'admin101'
 
 # Define the login page
 def login():
