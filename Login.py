@@ -1,60 +1,63 @@
 import streamlit as st
-from streamlit_lottie import st_lottie
-import requests
-import json
 
+# Define username and password
+CORRECT_USERNAME = 'myusername'
+CORRECT_PASSWORD = 'mypassword'
 
-st.title(' Welcome to Ujjal Flour Mills Dashboard')
+# Define the login page
+def login():
+    # Add a title
+    st.title('Login')
 
-def load_lottiefile(path:str):
-    with open (path, "r") as f:
-        return json.load(f)
+    # Add a form with username and password inputs
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
 
-load_file=load_lottiefile("/app/ujjal-py/hello.json")
-#load_2nd=load_lottiefile("/app/ujjal-py/2nd.json")
+    # Add a button to submit the form
+    if st.button('Login'):
+        if username == CORRECT_USERNAME and password == CORRECT_PASSWORD:
+            # Set the session state to True
+            st.session_state.logged_in = True
+        else:
+            st.error('Incorrect username or password')
 
-st_lottie(load_file)
-        
-#def second_page():
-    #st.write("You Have logged In as {}",format(username)
+# Define the app sections
+def home():
+    st.title('Home')
+    st.write('Welcome to the Home section of the app')
 
-             
-def authenticate(username,password):
-    if username=='ziead' and password=='123ziead':
-        return True
-    elif username=='dhrobe' and password=='123dhrobe':
-        return True
-    else:
-        return False
-st.sidebar.title("Login")
+def expense():
+    st.title('Expense')
+    st.write('Welcome to the Expense section of the app')
 
-username=st.sidebar.text_input("Enter Username")
-password=st.sidebar.text_input("Enter Password")
+def costing_pricing():
+    st.title('Costing and Pricing')
+    st.write('Welcome to the Costing and Pricing section of the app')
 
-if st.sidebar.button("Login"):
-    if authenticate(username,password):
-        st.sidebar.success(st.write("Logged in as {}".format(username)))
-    else:
-        st.sidebar.error("Incorrect username or password")
+def balance_sheet():
+    st.title('Balance Sheet')
+    st.write('Welcome to the Balance Sheet section of the app')
 
+# Check if the user is logged in
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
 
-# Render the appropriate page based on the user's login status
+# Show the appropriate page based on the logged-in state
+if not st.session_state.logged_in:
+    login()
+else:
+    # Add a horizontal navigation bar
+    st.set_page_config(page_title='App', page_icon=':money_with_wings:')
+    st.write('Navigation')
+    options = ['Home', 'Expense', 'Costing and Pricing', 'Balance Sheet']
+    choice = st.radio('', options)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # Show the appropriate app section based on the user's choice
+    if choice == 'Home':
+        home()
+    elif choice == 'Expense':
+        expense()
+    elif choice == 'Costing and Pricing':
+        costing_pricing()
+    elif choice == 'Balance Sheet':
+        balance_sheet()
