@@ -46,7 +46,23 @@ def home():
 
 def expense():
     st.title('Expense')
-    st.write('Welcome to the Expense section of the app')
+
+    # Add a horizontal navigation bar for the Expense section
+    st.write('Navigation')
+    options = ['Add Expense', 'Update Records', 'Export Summary']
+    choice = st.radio('', options)
+
+    # Show the appropriate section based on the user's choice
+    if choice == 'Add Expense':
+        st.header('Add Expense')
+        st.write('Here you can add a new expense record')
+    elif choice == 'Update Records':
+        st.header('Update Records')
+        st.write('Here you can update existing expense records')
+    elif choice == 'Export Summary':
+        st.header('Export Summary')
+        st.write('Here you can export a summary of all expense records')
+
 
 def costing_pricing():
     st.title('Costing and Pricing')
