@@ -2,6 +2,17 @@ import streamlit as st
 import sqlite3
 
 
+import pandas as pd
+import requests
+
+url= 'https://gitlab.com/username/repo/-/raw/master/data.xlsx'
+myfile = requests.get(url)
+
+df=pd.read_excel(myfile.content)
+print(df)
+
+
+
 # Define username and password
 CORRECT_USERNAME = 'Ujjaladmin'
 CORRECT_PASSWORD = 'admin101'
