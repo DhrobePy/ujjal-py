@@ -62,7 +62,7 @@ def expense():
         def insert_data(category, amount, date, remarks):
             conn = sqlite3.connect('expense_tracker.db')
             c = conn.cursor()
-            c.execute("INSERT INTO expenses (category, amount, date, remarks) VALUES (?, ?, ?, ?)", (category, amount, date, remarks))
+            c.execute("INSERT INTO expenses_tracker (category, amount, date, remarks) VALUES (?, ?, ?, ?)", (category, amount, date, remarks))
             conn.commit()
             conn.close()
 
