@@ -1,4 +1,6 @@
 import streamlit as st
+import sqlite3
+
 
 # Define username and password
 CORRECT_USERNAME = 'myusername'
@@ -55,7 +57,26 @@ def expense():
     # Show the appropriate section based on the user's choice
     if choice == 'Add Expense':
         st.header('Add Expense')
-        st.write('Here you can add a new expense record')
+
+        # Define a function to insert expense data into the database
+        def insert_data(category, amount, date, remarks):
+            conn = sqlite3.connect('expense_tracker.db')
+            c = conn.cursor()
+            c.execute("INSERT INTO expenses (category, amount, date, remarks) VALUES (?, ?, ?, ?)", (category, amount, date, remarks))
+            conn.commit()
+            conn.close()
+
+        # Add a form for the user to enter expense details
+        category = st.selectbox('Category of Expense', ['Raw Material Purchase', 'Transportation for Raw Material', 'Manpower for Raw Material Handling', 'Electricity Bill for Raw Material Processing', 'Packaging', 'Transportation to Buyer'])
+        amount = st.number_input('Amount of Expense')
+        date = st.date_input('Date of Expenditure')
+        remarks = st.text_area('Remarks')
+
+        # Add a button to submit the form and insert the data into the database
+        if st.button('Add Expense'):
+            insert_data(category, amount, date, remarks)
+            st.success('Expense added successfully')
+
     elif choice == 'Update Records':
         st.header('Update Records')
         st.write('Here you can update existing expense records')
