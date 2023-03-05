@@ -24,7 +24,25 @@ def login():
 # Define the app sections
 def home():
     st.title('Home')
-    st.write('Welcome to the Home section of the app')
+
+    # Add a horizontal navigation bar for the Home page
+    st.write('Navigation')
+    options = ['Products', 'Prices', 'Order Due', 'Bills Due']
+    choice = st.radio('', options)
+
+    # Show the appropriate section based on the user's choice
+    if choice == 'Products':
+        st.header('Products')
+        st.write('Here you can view a list of all products')
+    elif choice == 'Prices':
+        st.header('Prices')
+        st.write('Here you can view and update prices for different products')
+    elif choice == 'Order Due':
+        st.header('Order Due')
+        st.write('Here you can view a list of all pending orders')
+    elif choice == 'Bills Due':
+        st.header('Bills Due')
+        st.write('Here you can view a list of all pending bills')
 
 def expense():
     st.title('Expense')
@@ -46,7 +64,7 @@ if 'logged_in' not in st.session_state:
 if not st.session_state.logged_in:
     login()
 else:
-    # Add a horizontal navigation bar
+    # Add a horizontal navigation bar for the app sections
     st.set_page_config(page_title='App', page_icon=':money_with_wings:')
     st.write('Navigation')
     options = ['Home', 'Expense', 'Costing and Pricing', 'Balance Sheet']
