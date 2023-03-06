@@ -4,6 +4,15 @@ import sqlite3
 
 import pandas as pd
 
+#To hide Header & Footer of Streamlit APP"
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 
 
@@ -107,7 +116,7 @@ if not st.session_state.logged_in:
     login()
 else:
     # Add a horizontal navigation bar for the app sections
-    st.set_page_config(page_title='App', page_icon=':money_with_wings:')
+    #st.set_page_config(page_title='App', page_icon=':money_with_wings:')
     st.write('Navigation')
     options = ['Home', 'Expense', 'Costing and Pricing', 'Balance Sheet']
     choice = st.radio('', options)
