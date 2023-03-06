@@ -78,11 +78,11 @@ def expense():
 
         # Define a function to insert expense data into the database
         def insert_data(category, amount, date, remarks):
-            conn = sqlite3.connect('expense_tracker.db')
-            c = conn.cursor()
-            c.execute("INSERT INTO expenses_tracker (category, amount, date, remarks) VALUES (?, ?, ?, ?)", (category, amount, date, remarks))
-            conn.commit()
-            conn.close()
+            #conn = sqlite3.connect('expense_tracker.db')
+            #c = conn.cursor()
+            #c.execute("INSERT INTO expenses_tracker (category, amount, date, remarks) VALUES (?, ?, ?, ?)", (category, amount, date, remarks))
+            #conn.commit()
+            #conn.close()
 
         # Add a form for the user to enter expense details
         category = st.selectbox('Category of Expense', ['Raw Material Purchase', 'Transportation for Raw Material', 'Manpower for Raw Material Handling', 'Electricity Bill for Raw Material Processing', 'Packaging', 'Transportation to Buyer'])
