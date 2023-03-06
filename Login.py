@@ -1,10 +1,12 @@
 import streamlit as st
 import sqlite3
+from streamlit_option_menu import option_menu
+
+
 
 
 import pandas as pd
 
-#To hide Header & Footer of Streamlit APP"
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
@@ -13,7 +15,6 @@ hide_st_style = """
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
-
 
 
 # Define username and password
@@ -42,7 +43,7 @@ def home():
     st.title('Home')
 
     # Add a horizontal navigation bar for the Home page
-    st.write('Navigation')
+    #st.write('Navigation')
     options = ['Products', 'Prices', 'Order Due', 'Bills Due']
     choice = st.radio('', options)
 
@@ -64,12 +65,16 @@ def expense():
     st.title('Expense')
 
     # Add a horizontal navigation bar for the Expense section
-    st.write('Navigation')
-    options = ['Add Expense', 'Update Records', 'Export Summary']
-    choice = st.radio('', options)
+    #st.write('Navigation')
+    selected = option_menu(
+        options=['Add Expense', 'Update Records', 'Export Summary'],
+        menu_title=None,
+        menu_icon='cast',
+        orientation='horizontal')
+    #choice = st.radio('', options)
 
     # Show the appropriate section based on the user's choice
-    if choice == 'Add Expense':
+    if selected == 'Add Expense':
         st.header('Add Expense')
 
         # Define a function to insert expense data into the database
@@ -91,10 +96,10 @@ def expense():
             insert_data(category, amount, date, remarks)
             st.success('Expense added successfully')
 
-    elif choice == 'Update Records':
+    elif selected == 'Update Records':
         st.header('Update Records')
         st.write('Here you can update existing expense records')
-    elif choice == 'Export Summary':
+    elif selected == 'Export Summary':
         st.header('Export Summary')
         st.write('Here you can export a summary of all expense records')
 
@@ -117,16 +122,24 @@ if not st.session_state.logged_in:
 else:
     # Add a horizontal navigation bar for the app sections
     #st.set_page_config(page_title='App', page_icon=':money_with_wings:')
-    st.write('Navigation')
-    options = ['Home', 'Expense', 'Costing and Pricing', 'Balance Sheet']
-    choice = st.radio('', options)
+    #st.write('Navigation')
+
+    selected=option_menu(
+        menu_title=None,
+        options = ['Home', 'Expense', 'Costing and Pricing', 'Balance Sheet'],
+        menu_icon='cast',
+        default_index=0,
+        orientation='horizontal',
+        )
+        
+    #choice = st.radio('', options)
 
     # Show the appropriate app section based on the user's choice
-    if choice == 'Home':
+    if selected == 'Home':
         home()
-    elif choice == 'Expense':
+    elif selected == 'Expense':
         expense()
-    elif choice == 'Costing and Pricing':
+    elif selected == 'Costing and Pricing':
         costing_pricing()
-    elif choice == 'Balance Sheet':
+    elif selected == 'Balance Sheet':
         balance_sheet()
