@@ -77,7 +77,7 @@ def expense():
         st.header('Add Expense')
 
         # Define a function to insert expense data into the database
-        def insert_data(category, amount, date, remarks):
+        #def insert_data(category, amount, date, remarks):
             #conn = sqlite3.connect('expense_tracker.db')
             #c = conn.cursor()
             #c.execute("INSERT INTO expenses_tracker (category, amount, date, remarks) VALUES (?, ?, ?, ?)", (category, amount, date, remarks))
@@ -92,7 +92,7 @@ def expense():
 
         # Add a button to submit the form and insert the data into the database
         if st.button('Add Expense'):
-            insert_data(category, amount, date, remarks)
+            #insert_data(category, amount, date, remarks)
             st.success('Expense added successfully')
 
     elif selected == 'Update Records':
