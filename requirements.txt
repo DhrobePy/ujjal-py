@@ -1,3 +1,4 @@
 streamlit_lottie
 streamlit
 streamlit_option_menu
+sqlite3
