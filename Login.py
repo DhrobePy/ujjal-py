@@ -1,5 +1,4 @@
 import streamlit as st
-import sqlite3
 from streamlit-option-menu import option_menu
 
 
