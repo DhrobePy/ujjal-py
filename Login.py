@@ -7,8 +7,8 @@ from datetime import datetime, time
 
 
 
-cred = credentials.Certificate("https://github.com/DhrobePy/ujjal-py/blob/9fb6c34dfd49062f18ef4e9f46eed0574f2abc11/expenses_updated.json")
-firebase_admin.initialize_app(cred)
+#cred = credentials.Certificate("https://github.com/DhrobePy/ujjal-py/blob/9fb6c34dfd49062f18ef4e9f46eed0574f2abc11/expenses_updated.json")
+#firebase_admin.initialize_app(cred)
 
 # Get a reference to the Firestore database
 db = firestore.client()
