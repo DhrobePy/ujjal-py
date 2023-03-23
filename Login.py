@@ -1,7 +1,17 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+from datetime import datetime, time
 
 
+
+cred = credentials.Certificate("/Users/Dhrobe/Desktop/Ujjal/etrials/expenses_updated.json")
+#firebase_admin.initialize_app(cred)
+
+# Get a reference to the Firestore database
+db = firestore.client()
 
 
 import pandas as pd
@@ -65,42 +75,71 @@ def expense():
 
     # Add a horizontal navigation bar for the Expense section
     #st.write('Navigation')
+    #selected = st.selectbox('Select an Option', ['Add Expense', 'Expense Summary'])
     selected = option_menu(
-        options=['Add Expense', 'Update Records', 'Export Summary'],
+        options=['Add Expense', 'Update Records', 'Expense Summary'],
         menu_title=None,
         menu_icon='cast',
         orientation='horizontal')
-    #choice = st.radio('', options)
+
 
     # Show the appropriate section based on the user's choice
     if selected == 'Add Expense':
         st.header('Add Expense')
+        expense_date = st.date_input('Date of Expense')
+        expense_date_str = expense_date.strftime('%Y-%m-%d')
 
-        # Define a function to insert expense data into the database
-        #def insert_data(category, amount, date, remarks):
-            #conn = sqlite3.connect('expense_tracker.db')
-            #c = conn.cursor()
-            #c.execute("INSERT INTO expenses_tracker (category, amount, date, remarks) VALUES (?, ?, ?, ?)", (category, amount, date, remarks))
-            #conn.commit()
-            #conn.close()
+        # Define a function to insert expense data into the Firestore collection
+        def insert_data(category, amount, remarks):
+            now = datetime.now()
+            db.collection('expenses').add({
+                'category': category,
+                'amount': amount,
+                'remarks': remarks,
+                'datetime': now
+            })
 
         # Add a form for the user to enter expense details
         category = st.selectbox('Category of Expense', ['Raw Material Purchase', 'Transportation for Raw Material', 'Manpower for Raw Material Handling', 'Electricity Bill for Raw Material Processing', 'Packaging', 'Transportation to Buyer'])
         amount = st.number_input('Amount of Expense')
-        date = st.date_input('Date of Expenditure')
         remarks = st.text_area('Remarks')
 
-        # Add a button to submit the form and insert the data into the database
+        # Add a button to submit the form and insert the data into the Firestore collection
         if st.button('Add Expense'):
-            #insert_data(category, amount, date, remarks)
+            insert_data(category, amount, remarks)
             st.success('Expense added successfully')
-
     elif selected == 'Update Records':
         st.header('Update Records')
         st.write('Here you can update existing expense records')
-    elif selected == 'Export Summary':
-        st.header('Export Summary')
-        st.write('Here you can export a summary of all expense records')
+
+    elif selected == 'Expense Summary':
+        st.header('Expense Summary')
+
+        # Define a function to retrieve expense data from the Firestore collection
+        def get_expenses():
+            expenses = []
+            for expense in db.collection('expenses').get():
+                data = expense.to_dict()
+                expenses.append({
+                    'category': data['category'],
+                    'amount': data['amount'],
+                    'remarks': data['remarks'],
+                    #'datetime':data['datetime']
+                    'datetime': firebase_admin.firestore.SERVER_TIMESTAMP
+
+                    #'datetime': data['datetime'].strftime('%Y-%m-%d %H:%M:%S')
+                })
+            df = pd.DataFrame(expenses)
+            return df
+
+        # Retrieve the expense data and display it as a table
+        expenses_df = get_expenses()
+        st.dataframe(expenses_df)
+        #st.write(expenses_df)
+
+
+
+
 
 
 def costing_pricing():
