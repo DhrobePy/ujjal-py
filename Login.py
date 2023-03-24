@@ -146,6 +146,15 @@ def expense():
         # Retrieve the expense data and display it as a table
         expenses_df = get_expenses()
         st.dataframe(expenses_df)
+        
+        categories = expenses_df['Category'].unique()
+        for category in categories:
+            if category == 'Total':
+                continue
+            category_df = expenses_df[expenses_df['Category'] == category]
+            st.subheader(f'{category} Expenses')
+            st.write(category_df)
+            st.write(f'Total Amount: {category_df["Amount"].sum()}')
 
        
 
