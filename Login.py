@@ -139,8 +139,8 @@ def expense():
             df = df.append({'category': 'Total', 'amount': total_amount}, ignore_index=True)
     
     # Group the expenses by category and show a summary table
-            summary_df = df.groupby('category')['amount'].sum()
-            return df, summary_df
+            #summary_df = df.groupby('category')['amount'].sum()
+            return df
 
 
         # Retrieve the expense data and display it as a table
