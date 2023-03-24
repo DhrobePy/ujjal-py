@@ -4,6 +4,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime, time
+import base64
 
 
 
@@ -155,7 +156,12 @@ def expense():
             st.subheader(f'{category} Expenses')
             st.write(category_df)
             st.write(f'Total Amount: {category_df["Amount"].sum()}')
-
+     #Download Button for total expense summary       
+        if st.button('Download Expense Summary Report'):
+            csv = expenses_df.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="expense_summary_report.csv">Download CSV file</a>'
+            st.markdown(href, unsafe_allow_html=True)
        
 
 
