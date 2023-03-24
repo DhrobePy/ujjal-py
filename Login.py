@@ -62,18 +62,17 @@ def home():
         st.header('Bills Due')
         st.write('Here you can view a list of all pending bills')
 
+
+
 def expense():
     st.title('Expense')
 
     # Add a horizontal navigation bar for the Expense section
-    #st.write('Navigation')
-    #selected = st.selectbox('Select an Option', ['Add Expense', 'Expense Summary'])
     selected = option_menu(
         options=['Add Expense', 'Update Records', 'Expense Summary'],
         menu_title=None,
         menu_icon='cast',
         orientation='horizontal')
-
 
     # Show the appropriate section based on the user's choice
     if selected == 'Add Expense':
@@ -82,54 +81,68 @@ def expense():
         expense_date_str = expense_date.strftime('%Y-%m-%d')
 
         # Define a function to insert expense data into the Firestore collection
-        def insert_data(category, amount, remarks):
+        # Define a function to insert expense data into the Firestore collection
+        def insert_data(category, amount, method, paid_by, remarks, expense_date):
+            expense_date_str = expense_date.strftime('%Y-%m-%d')
             now = datetime.now()
             db.collection('expenses').add({
                 'category': category,
                 'amount': amount,
+                'method': method,
+                'paid_by': paid_by,
                 'remarks': remarks,
+                'expense_date': expense_date_str,
                 'datetime': now
             })
+
 
         # Add a form for the user to enter expense details
         category = st.selectbox('Category of Expense', ['Raw Material Purchase', 'Transportation for Raw Material', 'Manpower for Raw Material Handling', 'Electricity Bill for Raw Material Processing', 'Packaging', 'Transportation to Buyer'])
         amount = st.number_input('Amount of Expense')
+        method = st.selectbox('Way of Payment', ['Cash', 'Bank Account Cheque'])
+        if method == 'Cash':
+            paid_by = st.text_input('Paid By')
+        else:
+            bank_accounts = ['1234567890', '2345678901', '3456789012', '4567890123', '5678901234']
+            paid_by = st.selectbox('Bank Account Number', bank_accounts)
+
         remarks = st.text_area('Remarks')
 
         # Add a button to submit the form and insert the data into the Firestore collection
         if st.button('Add Expense'):
-            insert_data(category, amount, remarks)
+            insert_data(category, amount, method, paid_by, remarks, expense_date)
             st.success('Expense added successfully')
-    elif selected == 'Update Records':
-        st.header('Update Records')
-        st.write('Here you can update existing expense records')
+    
 
     elif selected == 'Expense Summary':
         st.header('Expense Summary')
 
         # Define a function to retrieve expense data from the Firestore collection
+        # Define a function to retrieve expense data from the Firestore collection
         def get_expenses():
             expenses = []
             for expense in db.collection('expenses').get():
                 data = expense.to_dict()
-                expenses.append({
-                    'category': data['category'],
-                    'amount': data['amount'],
-                    'remarks': data['remarks'],
-                    #'datetime':data['datetime']
-                    'datetime': firebase_admin.firestore.SERVER_TIMESTAMP
-
-                    #'datetime': data['datetime'].strftime('%Y-%m-%d %H:%M:%S')
-                })
+                if 'method' in data:
+                    expense_date_str = data.get('expense_date', '')
+                    expense_date = datetime.strptime(expense_date_str, '%Y-%m-%d').date() if expense_date_str else None
+                    expenses.append({
+                        'category': data['category'],
+                        'amount': data['amount'],
+                        'method': data['method'],
+                        'paid_by': data.get('paid_by', ''),
+                        'remarks': data.get('remarks', ''),
+                        'expense_date': expense_date
+                    })
             df = pd.DataFrame(expenses)
             return df
+
 
         # Retrieve the expense data and display it as a table
         expenses_df = get_expenses()
         st.dataframe(expenses_df)
-        #st.write(expenses_df)
 
-
+       
 
 
 
