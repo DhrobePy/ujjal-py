@@ -25,7 +25,7 @@ def create_download_link(df):
 
 
 cred = credentials.Certificate("expenses_updated.json")
-#firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred)
 
 # Get a reference to the Firestore database
 db = firestore.client()
