@@ -3,9 +3,22 @@ from streamlit_option_menu import option_menu
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import base64
+import streamlit_lottie as st_lottie
+import requests
+import json
 
+
+
+with open('download_button.json', 'r') as f:
+    button_data = f.read()
+
+def create_download_link(df):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="expense_report.csv">Download Expense Report</a>'
+    return href
 
 
 cred = credentials.Certificate("expenses_updated.json")
@@ -118,53 +131,57 @@ def expense():
     elif selected == 'Expense Summary':
         st.header('Expense Summary')
 
-        # Define a function to retrieve expense data from the Firestore collection
-        # Define a function to retrieve expense data from the Firestore collection
-        def get_expenses():
-            expenses = []
-            for expense in db.collection('expenses').get():
-                data = expense.to_dict()
-                if 'method' in data:
-                    expense_date_str = data.get('expense_date', '')
-                    expense_date = datetime.strptime(expense_date_str, '%Y-%m-%d').date() if expense_date_str else None
-                    expenses.append({
-                        'Category': data['category'],
-                        'Amount': data['amount'],
-                        'Payment Method': data['method'],
-                        'Paid By': data.get('paid_by', ''),
-                        'Description': data.get('remarks', ''),
-                        'Date of Expense': expense_date
-                    })
-            df = pd.DataFrame(expenses)
-            total_amount = df['Amount'].sum()
-            df = df.append({'Category': 'Total', 'Amount': total_amount}, ignore_index=True)
-    
-    # Group the expenses by category and show a summary table
-            #summary_df = df.groupby('category')['amount'].sum()
-            return df
+    # Add date pickers to select start and end dates
+        start_date = st.date_input('Select start date')
+        end_date = st.date_input('Select end date', value=datetime.now().date())
 
-
-        # Retrieve the expense data and display it as a table
-        expenses_df = get_expenses()
-        st.dataframe(expenses_df)
+    # Add a button to show expenses for the selected period
+        if st.button('Show Expense Report'):
+        # Define a function to retrieve expense data from the Firestore collection
+            def get_expenses():
+                expenses = []
+                for expense in db.collection('expenses').get():
+                    data = expense.to_dict()
+                    if 'method' in data:
+                        expense_date_str = data.get('expense_date', '')
+                        expense_date = datetime.strptime(expense_date_str, '%Y-%m-%d').date() if expense_date_str else None
+                        if expense_date and start_date <= expense_date <= end_date:
+                            expenses.append({
+                                'Category': data['category'],
+                                'Amount': data['amount'],
+                                'Payment Method': data['method'],
+                                'Paid By': data.get('paid_by', ''),
+                                'Description': data.get('remarks', ''),
+                                'Date of Expense': expense_date
+                            })
+                df = pd.DataFrame(expenses)
+                total_amount = df['Amount'].sum()
+                df = df.append({'Category': 'Total', 'Amount': total_amount}, ignore_index=True)
         
-        categories = expenses_df['Category'].unique()
-        for category in categories:
-            if category == 'Total':
-                continue
-            category_df = expenses_df[expenses_df['Category'] == category]
-            st.subheader(f'{category} Expenses')
-            st.write(category_df)
-            st.write(f'Total Amount: {category_df["Amount"].sum()}')
-     #Download Button for total expense summary       
-        if st.button('Download Expense Summary Report'):
-            csv = expenses_df.to_csv(index=False)
-            b64 = base64.b64encode(csv.encode()).decode()
-            href = f'<a href="data:file/csv;base64,{b64}" download="expense_summary_report.csv">Download CSV file</a>'
-            st.markdown(href, unsafe_allow_html=True)
-       
+                # Group the expenses by category and show a summary table for each category
+                categories = df['Category'].unique()
+                for category in categories:
+                    if category == 'Total':
+                        continue
+                    category_df = df[df['Category'] == category]
+                    st.subheader(f'{category} Expenses')
+                    st.write(category_df)
+                    st.write(f'Total Amount: {category_df["Amount"].sum()}')
+
+                # Show the summary table for all expenses
+                st.subheader('All Expenses')
+                st.dataframe(df)
 
 
+                # Add a button to download the expense report as a CSV file
+                #st.button("Download Expense Summary Report"):
+                csv = df.to_csv(index=False)
+                b64 = base64.b64encode(csv.encode()).decode()
+                href = f'<a href="data:file/csv;base64,{b64}" download="expense_report.csv">Download Expense Report (CSV)</a>'
+                st.markdown(href, unsafe_allow_html=True)
+
+            # Retrieve the expense data for the selected period and display it as a table
+            get_expenses()
 
 
 def costing_pricing():
