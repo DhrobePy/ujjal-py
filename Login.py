@@ -188,7 +188,7 @@ def expense():
                 expenses_chart_data =df[df['Category'] != 'Total']
                 chart = create_chart(expenses_chart_data)
                 fig = px.pie(df, values='Amount', names=df.index)
-                st.plotly_chart(fig)
+                
                 col1, col2 = st.columns([2, 1])
                 with col1:
                     st.altair_chart(chart, use_container_width=True)
