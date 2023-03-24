@@ -8,6 +8,9 @@ import base64
 import streamlit_lottie as st_lottie
 import requests
 import json
+import altair as alt
+import plotly.express as px
+
 
 
 
@@ -76,6 +79,16 @@ def home():
         st.header('Bills Due')
         st.write('Here you can view a list of all pending bills')
 
+def create_chart(df):
+    chart_data = df.groupby('Category')['Amount'].sum()
+    chart = alt.Chart(chart_data.reset_index()).mark_bar().encode(
+        x=alt.X('Category', sort='-y'),
+        y=alt.Y('Amount', title='Total Amount'),
+        tooltip=['Category', 'Amount']
+    ).properties(
+        title='Expenses by Category'
+    )
+    return chart
 
 
 def expense():
@@ -172,6 +185,17 @@ def expense():
                 st.subheader('All Expenses')
                 st.dataframe(df)
 
+                expenses_chart_data =df[df['Category'] != 'Total']
+                chart = create_chart(expenses_chart_data)
+                fig = px.pie(df, values='Amount', names=df.index)
+                st.plotly_chart(fig)
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    st.altair_chart(chart, use_container_width=True)
+                with col2:
+                    st.plotly_chart(fig)           
+                
+
 
                 # Add a button to download the expense report as a CSV file
                 #st.button("Download Expense Summary Report"):
@@ -182,6 +206,7 @@ def expense():
 
             # Retrieve the expense data for the selected period and display it as a table
             get_expenses()
+
 
 
 def costing_pricing():
