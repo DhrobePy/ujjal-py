@@ -127,12 +127,12 @@ def expense():
                     expense_date_str = data.get('expense_date', '')
                     expense_date = datetime.strptime(expense_date_str, '%Y-%m-%d').date() if expense_date_str else None
                     expenses.append({
-                        'category': data['category'],
-                        'amount': data['amount'],
-                        'method': data['method'],
-                        'paid_by': data.get('paid_by', ''),
-                        'remarks': data.get('remarks', ''),
-                        'expense_date': expense_date
+                        'Category': data['category'],
+                        'Amount': data['amount'],
+                        'Payment Method': data['method'],
+                        'Paid By': data.get('paid_by', ''),
+                        'Description': data.get('remarks', ''),
+                        'Date of Expense': expense_date
                     })
             df = pd.DataFrame(expenses)
             return df
