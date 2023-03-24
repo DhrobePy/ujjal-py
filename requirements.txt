@@ -3,4 +3,6 @@ streamlit
 streamlit_option_menu
 firebase_admin
 datetime
+plotly.express
+altair
 
