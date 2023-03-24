@@ -135,7 +135,7 @@ def expense():
                         'Date of Expense': expense_date
                     })
             df = pd.DataFrame(expenses)
-            total_amount = df['amount'].sum()
+            total_amount = df['Amount'].sum()
             df = df.append({'category': 'Total', 'amount': total_amount}, ignore_index=True)
     
     # Group the expenses by category and show a summary table
