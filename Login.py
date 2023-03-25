@@ -22,6 +22,7 @@ def create_download_link(df):
     b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="expense_report.csv">Download Expense Report</a>'
     return href
+    
 
 def create_products_table():
     data = {
@@ -33,6 +34,65 @@ def create_products_table():
     }
     df = pd.DataFrame(data)
     return df
+
+def edit_products():
+    st.title('Edit Products')
+
+    # Load the products table from Firestore
+    products_ref = db.collection('products')
+    products = products_ref.stream()
+    products_dict = {}
+    for product in products:
+        products_dict[product.id] = product.to_dict()
+
+    # Convert the products dictionary to a Pandas DataFrame
+    products_df = pd.DataFrame.from_dict(products_dict, orient='index')
+    products_df.index.name = 'Product ID'
+
+    # Show the products table in a form, allowing users to edit the values
+    st.write(products_df)
+
+    # Add a button to save the updated products table to Firestore
+    if st.button('Save Changes'):
+        for product_id, row in products_df.iterrows():
+            product_ref = products_ref.document(product_id)
+            product_ref.update(row.to_dict())
+
+        st.success('Products table updated successfully')
+
+
+def customer_details():
+    st.title('Customer Details')
+
+    # Add a button to read the customer details from an Excel file
+    if st.button('Read Customer Details'):
+        # Read the customer details from the Excel file
+        customer_details_df = pd.read_excel('customer_details.xlsx')
+
+        # Add a row to show the total value of receivables
+        total_receivables = customer_details_df['Bills Due'].sum()
+        total_row = pd.DataFrame({'Name': 'Total', 'Bills Due': total_receivables}, index=[len(customer_details_df)])
+        customer_details_df = customer_details_df.append(total_row)
+
+        # Show the customer details table
+        st.write(customer_details_df)
+
+        # Add a button to update the customer details
+        if st.button('Update Customer Details'):
+            # Update the customer details in the Excel file
+            customer_details_df.to_excel('customer_details.xlsx', index=False)
+
+            st.success('Customer details updated successfully')
+    
+        # Show the customer-wise bills due in separate tables
+        st.subheader('Customer-Wise Bills Due')
+        grouped_df = customer_details_df.groupby('Name')['Bills Due'].sum()
+        for name, bills_due in grouped_df.iteritems():
+            st.subheader(f'{name} - Bills Due: {bills_due}')
+            st.write(customer_details_df[customer_details_df['Name'] == name])
+
+#propriate app section based on the user's choice
+
 
 
 
@@ -87,6 +147,7 @@ def home():
         st.write('Here you can view a list of all products')
         products_df = create_products_table()
         st.write(products_df)
+        edit_products()
 
     elif choice == 'Prices':
         st.header('Prices')
@@ -96,6 +157,7 @@ def home():
         st.write('Here you can view a list of all pending orders')
     elif choice=='Bills Receivables':
         st.header('Bills receivables')
+        customer_details()
     elif choice == 'Bills Payables':
         st.header('Bills Due')
         st.write('Here you can view a list of all pending bills')
