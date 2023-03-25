@@ -62,7 +62,12 @@ def home():
 
     # Add a horizontal navigation bar for the Home page
     #st.write('Navigation')
-    options = ['Products', 'Prices', 'Order Due', 'Bills Due']
+    selected = option_menu(
+        options=['Products', 'Prices', 'Orders Due', 'Bills Receivables', 'Bills Payables'],
+        menu_title=None,
+        menu_icon='cast',
+        orientation='horizontal')
+    #options = ['Products', 'Prices', 'Order Due', 'Bills Due']
     choice = st.radio('', options)
 
     # Show the appropriate section based on the user's choice
@@ -72,10 +77,12 @@ def home():
     elif choice == 'Prices':
         st.header('Prices')
         st.write('Here you can view and update prices for different products')
-    elif choice == 'Order Due':
-        st.header('Order Due')
+    elif choice == 'Orders Due':
+        st.header('Orders Due')
         st.write('Here you can view a list of all pending orders')
-    elif choice == 'Bills Due':
+    elif choice=='Bills Receivables':
+        st.header('Bills receivables')
+    elif choice == 'Bills Payables':
         st.header('Bills Due')
         st.write('Here you can view a list of all pending bills')
 
