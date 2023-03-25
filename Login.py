@@ -34,31 +34,56 @@ def create_products_table():
     }
     df = pd.DataFrame(data)
     return df
-
 def edit_products():
     st.title('Edit Products')
+    st.write('Here you can view and update details of all products')
 
-    # Load the products table from Firestore
-    products_ref = db.collection('products')
-    products = products_ref.stream()
-    products_dict = {}
-    for product in products:
-        products_dict[product.id] = product.to_dict()
+    # Retrieve all products from Firestore and create a dictionary
+    def get_products():
+        products = {}
+        for product in db.collection('products').get():
+            product_id = product.id
+            data = product.to_dict()
+            products[product_id] = data
+        return products
 
-    # Convert the products dictionary to a Pandas DataFrame
-    products_df = pd.DataFrame.from_dict(products_dict, orient='index')
-    products_df.index.name = 'Product ID'
+    # Display the products as a drop-down menu
+    products = get_products()
+    product_names = [product['Product'] for product in products.values()]
+    selected_product_name = st.selectbox('Select a product to edit', options=product_names)
 
-    # Show the products table in a form, allowing users to edit the values
-    st.write(products_df)
+    # Get the selected product's details
+    for product_id, product_data in products.items():
+        if product_data['Product'] == selected_product_name:
+            selected_product_id = product_id
+            selected_product = product_data
+            break
 
-    # Add a button to save the updated products table to Firestore
-    if st.button('Save Changes'):
-        for product_id, row in products_df.iterrows():
-            product_ref = products_ref.document(product_id)
-            product_ref.update(row.to_dict())
+    # Show the selected product's details in a form, allowing users to edit the values
+    product = st.text_input('Product', value=selected_product['Product'])
+    description = st.text_area('Description', value=selected_product['Description'])
+    stock_yesterday = st.number_input('Stock as of yesterday', value=selected_product['Stock as of yesterday'])
+    stock_today = st.number_input('Stock as of Today', value=selected_product['Stock as of Today'])
+    total_stock_remaining = stock_yesterday + stock_today
 
-        st.success('Products table updated successfully')
+    # Update the selected product in the Firestore database with the new values from the form
+    if st.button('Update Product'):
+        product_ref = db.collection('products').document(selected_product_id)
+        product_ref.update({
+            'Product': product,
+            'Description': description,
+            'Stock as of yesterday': stock_yesterday,
+            'Stock as of Today': stock_today,
+            'Total Stock Remaining': total_stock_remaining
+        })
+        st.success('Product updated successfully')
+
+    # Add a button to download the updated products table as a CSV file
+    products_df = pd.DataFrame.from_dict(products, orient='index')
+    download_href = create_download_link(products_df)
+    st.markdown(download_href, unsafe_allow_html=True)
+
+
 
 def customer_details():
     st.title('Customer Details')
