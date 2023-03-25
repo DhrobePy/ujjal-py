@@ -26,10 +26,10 @@ def create_download_link(df):
 def create_products_table():
     data = {
         'Product': ['Rutti','Jora Hati','Ek hati', 'Kobutor','sunflower','E-Atta'],
-        'Description': ['Description 1', 'Description 2', 'Description 3', 'Description 4', 'Description 5', 'Description 6', 'Description 7'],
-        'Stock as of yesterday ': [50, 80, 25, 75, 60, 90, 100],
-        'Stock as of Today':[20,30,40,20,30,40,20],
-        'Total Stock Remaining':[70, 110, 65, 95,90,130,120]
+        'Description': ['Description 1', 'Description 2', 'Description 3', 'Description 4', 'Description 5', 'Description 6'],
+        'Stock as of yesterday ': [50, 80, 25, 75, 60, 90],
+        'Stock as of Today':[20,30,40,20,30,40],
+        'Total Stock Remaining':[70, 110, 65, 95,90,130]
     }
     df = pd.DataFrame(data)
     return df
