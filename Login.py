@@ -23,6 +23,16 @@ def create_download_link(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="expense_report.csv">Download Expense Report</a>'
     return href
 
+def create_products_table():
+    data = {
+        'Product': [f'Item {i}' for i in range(1, 8)],
+        'Description': ['Description 1', 'Description 2', 'Description 3', 'Description 4', 'Description 5', 'Description 6', 'Description 7'],
+        'Stock in Hand': [50, 80, 25, 75, 60, 90, 100]
+    }
+    df = pd.DataFrame(data)
+    return df
+
+
 
 cred = credentials.Certificate("expenses_updated.json")
 #firebase_admin.initialize_app(cred)
@@ -72,8 +82,10 @@ def home():
 
     # Show the appropriate section based on the user's choice
     if choice == 'Products':
-        st.header('Products')
         st.write('Here you can view a list of all products')
+        products_df = create_products_table()
+        st.write(products_df)
+
     elif choice == 'Prices':
         st.header('Prices')
         st.write('Here you can view and update prices for different products')
