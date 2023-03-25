@@ -60,38 +60,86 @@ def edit_products():
 
         st.success('Products table updated successfully')
 
-
 def customer_details():
     st.title('Customer Details')
 
     # Add a button to read the customer details from an Excel file
-    if st.button('Read Customer Details'):
+    # Add a button to read the customer details from an Excel file
+    if st.button('Read Customer Details from Excel'):
         # Read the customer details from the Excel file
-        customer_details_df = pd.read_excel('customer_details.xlsx')
-
-        # Add a row to show the total value of receivables
-        total_receivables = customer_details_df['Bills Due'].sum()
-        total_row = pd.DataFrame({'Name': 'Total', 'Bills Due': total_receivables}, index=[len(customer_details_df)])
-        customer_details_df = customer_details_df.append(total_row)
-
-        # Show the customer details table
-        st.write(customer_details_df)
-
-        # Add a button to update the customer details
-        if st.button('Update Customer Details'):
-            # Update the customer details in the Excel file
-            customer_details_df.to_excel('customer_details.xlsx', index=False)
-
-            st.success('Customer details updated successfully')
+        df = pd.read_excel('customer_details.xlsx')
+        df['Due Date'] = pd.to_datetime(df['Due Date'], format='%d-%m-%Y')
+        df['Days Overdue'] = (datetime.now().date() - df['Due Date']).dt.days.clip(lower=0)
+        df['Amount Due'] = df['Amount Due'].astype(float)
+        df['Total Amount Due'] = df['Amount Due'].sum()
+        df['Total Amount Due'] = df['Total Amount Due'].astype(float)
     
-        # Show the customer-wise bills due in separate tables
-        st.subheader('Customer-Wise Bills Due')
-        grouped_df = customer_details_df.groupby('Name')['Bills Due'].sum()
-        for name, bills_due in grouped_df.iteritems():
-            st.subheader(f'{name} - Bills Due: {bills_due}')
-            st.write(customer_details_df[customer_details_df['Name'] == name])
+        # Show the table of customer details
+        st.write(df)
 
-#propriate app section based on the user's choice
+    # Add a button to update the customer details
+    if st.button('Update Customer Details'):
+        # Show the table of customer details with editable cells
+        editable_df = df.copy()
+        editable_df.set_index('Customer Name', inplace=True)
+        st.write(editable_df)
+
+        # Add a button to save the updated customer details
+        if st.button('Save Customer Details'):
+            # Update the customer details in the Excel file
+            editable_df.reset_index(inplace=True)
+            editable_df.to_excel('customer_details.xlsx', index=False)
+
+# Add a button to show the table of receivables
+    if st.button('Show Receivables'):
+        # Read the customer details from the Excel file
+        df = pd.read_excel('customer_details.xlsx')
+        df['Due Date'] = pd.to_datetime(df['Due Date'], format='%d-%m-%Y')
+        df['Days Overdue'] = (datetime.now().date() - df['Due Date']).dt.days.clip(lower=0)
+        df['Amount Due'] = df['Amount Due'].astype(float)
+    
+        # Show the table of receivables
+        receivables_df = df[['Customer Name', 'Due Date', 'Amount Due', 'Days Overdue']]
+        st.write(receivables_df)
+
+    # Add a button to update the receivables
+    if st.button('Update Receivables'):
+        # Show the table of receivables with editable cells
+        editable_df = receivables_df.copy()
+        editable_df.set_index('Customer Name', inplace=True)
+        st.write(editable_df)
+
+        # Add a button to save the updated receivables
+        if st.button('Save Receivables'):
+            # Update the receivables in the Excel file
+            editable_df.reset_index(inplace=True)
+            editable_df.to_excel('customer_details.xlsx', index=False)
+
+# Add a button to show the total amount due
+    if st.button('Show Total Amount Due'):
+        # Read the customer details from the Excel file
+        df = pd.read_excel('customer_details.xlsx')
+        df['Amount Due'] = df['Amount Due'].astype(float)
+    
+        # Show the total amount due
+        total_amount_due = df['Amount Due'].sum()
+        st.write(f'Total Amount Due: {total_amount_due}')
+    
+    # Add a button to show customer-wise total bills due
+    
+    if st.button('Show Customer-wise Total Bills Due'):
+        # Read the customer details from the Excel file
+        df = pd.read_excel('customer_details.xlsx')
+        df['Amount Due'] = df['Amount Due'].astype(float)
+    
+    # Group the customer details by customer name and show the total bills due for each customer
+    customer_groups = df.groupby('Customer Name')
+    for customer_name, customer_df in customer_groups:
+        total_bills_due = customer_df['Amount Due'].sum()
+        st.write
+
+
+
 
 
 
