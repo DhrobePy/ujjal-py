@@ -141,6 +141,56 @@ def expense():
             st.success('Expense added successfully')
     
 
+    elif selected == 'Update Records':
+    st.header('Update Records')
+
+    # Retrieve all expenses from Firestore and create a dictionary
+    def get_expenses():
+        expenses = {}
+        for expense in db.collection('expenses').get():
+            expense_id = expense.id
+            data = expense.to_dict()
+            expenses[expense_id] = data
+        return expenses
+
+    # Display the expenses as a drop-down menu
+    expenses = get_expenses()
+    expense_ids = list(expenses.keys())
+    expense_names = [f"{expense['category']} - {expense['expense_date']}" for expense in expenses.values()]
+    expense_dict = dict(zip(expense_ids, expense_names))
+    selected_expense_id = st.selectbox("Select an expense to update", options=expense_ids, format_func=lambda x: expense_dict[x])
+
+    # Get the selected expense's details
+    selected_expense = expenses[selected_expense_id]
+
+    # Show the selected expense's details in a form, allowing users to edit the values
+    category = st.selectbox('Category of Expense', ['Raw Material Purchase', 'Transportation for Raw Material', 'Manpower for Raw Material Handling', 'Electricity Bill for Raw Material Processing', 'Packaging', 'Transportation to Buyer'], index=['Raw Material Purchase', 'Transportation for Raw Material', 'Manpower for Raw Material Handling', 'Electricity Bill for Raw Material Processing', 'Packaging', 'Transportation to Buyer'].index(selected_expense['category']))
+    amount = st.number_input('Amount of Expense', value=float(selected_expense['amount']))
+    method = st.selectbox('Way of Payment', ['Cash', 'Bank Account Cheque'], index=['Cash', 'Bank Account Cheque'].index(selected_expense['method']))
+    if method == 'Cash':
+        paid_by = st.text_input('Paid By', value=str(selected_expense.get('paid_by', '')))
+    else:
+        bank_accounts = ['1234567890', '2345678901', '3456789012', '4567890123', '5678901234']
+        paid_by = st.selectbox('Bank Account Number', bank_accounts, index=bank_accounts.index(str(selected_expense.get('paid_by', ''))))
+    remarks = st.text_area('Remarks', value=str(selected_expense.get('remarks', '')))
+    expense_date = st.date_input('Date of Expense', value=datetime.strptime(selected_expense['expense_date'], '%Y-%m-%d').date())
+
+    # Update the selected expense in the Firestore database with the new values from the form
+    if st.button('Update Expense'):
+        expense_ref = db.collection('expenses').document(selected_expense_id)
+        expense_date_str = expense_date.strftime('%Y-%m-%d')
+        expense_ref.update({
+            'category': category,
+            'amount': amount,
+            'method': method,
+            'paid_by': paid_by,
+            'remarks': remarks,
+            'expense_date': expense_date_str,
+        })
+        st.success('Expense updated successfully')
+
+    
+    
     elif selected == 'Expense Summary':
         st.header('Expense Summary')
 
