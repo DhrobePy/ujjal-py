@@ -62,13 +62,13 @@ def home():
 
     # Add a horizontal navigation bar for the Home page
     #st.write('Navigation')
-    selected = option_menu(
+    choice = option_menu(
         options=['Products', 'Prices', 'Orders Due', 'Bills Receivables', 'Bills Payables'],
         menu_title=None,
         menu_icon='cast',
         orientation='horizontal')
     #options = ['Products', 'Prices', 'Order Due', 'Bills Due']
-    choice = st.radio('', options)
+    #choice = st.radio('', options)
 
     # Show the appropriate section based on the user's choice
     if choice == 'Products':
