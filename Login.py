@@ -202,63 +202,25 @@ def login():
             st.error('Incorrect username or password')
 
 # Define the app sections
-def get_stock_data():
-    stock_ref = db.collection('stock_data')
-    stock_docs = stock_ref.stream()
-
-    stock_data = []
-
-    for doc in stock_docs:
-        stock_data.append(doc.to_dict())
-
-    return pd.DataFrame(stock_data)
-
 def home():
     st.title('Home')
 
     # Add a horizontal navigation bar for the Home page
-    options = ['Products', 'Prices', 'Order Due', 'Bills Due']
-    choice = st.radio('', options)
+    #st.write('Navigation')
+    choice = option_menu(
+        options=['Products', 'Prices', 'Orders Due', 'Bills Receivables', 'Bills Payables'],
+        menu_title=None,
+        menu_icon='cast',
+        orientation='horizontal')
+    #options = ['Products', 'Prices', 'Order Due', 'Bills Due']
+    #choice = st.radio('', options)
 
     # Show the appropriate section based on the user's choice
     if choice == 'Products':
-        st.header('Products')
-
-        stock_df = get_stock_data()
-        st.write(stock_df)
-
-        if st.button('Update Stock'):
-            # Create a list of product types
-            product_types = ['Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5', 'Product 6', 'Product 7']
-
-            # Create an empty DataFrame with the desired columns
-            data = {'Product Type': product_types,
-                    'Stock Today (kg)': [0]*len(product_types),
-                    'Stock Yesterday (kg)': [0]*len(product_types),
-                    'Total Stock (kg)': [0]*len(product_types)}
-
-            # Create a form to update the stock in hand
-            with st.form(key='stock_form'):
-                st.write('Update Stock in Hand')
-                stock_df = pd.DataFrame(data)
-
-                for index, row in stock_df.iterrows():
-                    row['Stock Today (kg)'] = st.number_input(f"{row['Product Type']} Stock Today (kg)", min_value=0, step=1)
-                    row['Stock Yesterday (kg)'] = st.number_input(f"{row['Product Type']} Stock Yesterday (kg)", min_value=0, step=1)
-                    row['Total Stock (kg)'] = row['Stock Today (kg)'] + row['Stock Yesterday (kg)']
-
-                stock_df.loc['Total'] = stock_df.sum(numeric_only=True)
-                stock_df.at['Total', 'Product Type'] = 'Total'
-                st.write(stock_df)
-
-                submit_button = st.form_submit_button('Save Updated Stock')
-
-                if submit_button:
-                    save_stock_data(stock_df)
-                    st.success('Stock updated successfully')
-
-    # ... (the rest of the home function)
-
+        st.write('Here you can view a list of all products')
+        products_df = create_products_table()
+        st.write(products_df)
+        edit_products()
 
     elif choice == 'Prices':
         st.header('Prices')
