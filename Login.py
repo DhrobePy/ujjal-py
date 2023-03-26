@@ -34,54 +34,53 @@ def create_products_table():
     }
     df = pd.DataFrame(data)
     return df
-def edit_products():
-    st.title('Edit Products')
-    st.write('Here you can view and update details of all products')
+def collect_stock_data():
+    st.title('Collect Stock Data')
 
-    # Retrieve all products from Firestore and create a dictionary
-    def get_products():
-        products = {}
-        for product in db.collection('products').get():
-            product_id = product.id
-            data = product.to_dict()
-            products[product_id] = data
-        return products
+    product_names = ['Rutti', 'Jora Hate', 'Single haiti', 'Kobutor', 'Sunflower', 'Elders Atta']
+    stock_data = {}
 
-    # Display the products as a drop-down menu
-    products = get_products()
-    product_names = [product['Product'] for product in products.values()]
-    selected_product_name = st.selectbox('Select a product to edit', options=product_names)
+    with st.form(key='stock_form'):
+        for product_name in product_names:
+            stock_data[product_name] = {
+                'stock_amount': st.number_input(f"{product_name} Stock Amount", min_value=0, step=1),
+                'yesterdays_stock': st.number_input(f"{product_name} Yesterday's Stock", min_value=0, step=1)
+            }
+        
+        submit_button = st.form_submit_button('Save Stock Data')
 
-    # Get the selected product's details
-    for product_id, product_data in products.items():
-        if product_data['Product'] == selected_product_name:
-            selected_product_id = product_id
-            selected_product = product_data
-            break
+    if submit_button:
+        # Save the stock data to Firestore
+        for product_name, stock_values in stock_data.items():
+            product_ref = db.collection('products').document(product_name)
+            product_ref.set(stock_values)
+        st.success('Stock data saved successfully')
 
-    # Show the selected product's details in a form, allowing users to edit the values
-    product = st.text_input('Product', value=selected_product['Product'])
-    description = st.text_area('Description', value=selected_product['Description'])
-    stock_yesterday = st.number_input('Stock as of yesterday', value=selected_product['Stock as of yesterday'])
-    stock_today = st.number_input('Stock as of Today', value=selected_product['Stock as of Today'])
-    total_stock_remaining = stock_yesterday + stock_today
-
-    # Update the selected product in the Firestore database with the new values from the form
-    if st.button('Update Product'):
-        product_ref = db.collection('products').document(selected_product_id)
-        product_ref.update({
-            'Product': product,
-            'Description': description,
-            'Stock as of yesterday': stock_yesterday,
-            'Stock as of Today': stock_today,
-            'Total Stock Remaining': total_stock_remaining
+    # Display the updated stock table
+    st.subheader('Updated Stock Table')
+    stock_table_data = []
+    for product_name in product_names:
+        product_ref = db.collection('products').document(product_name)
+        product_data = product_ref.get().to_dict()
+        stock_amount = product_data.get('stock_amount', 0)
+        yesterdays_stock = product_data.get('yesterdays_stock', 0)
+        total_stock = stock_amount + yesterdays_stock
+        stock_table_data.append({
+            'Product': product_name, 
+            'Stock Amount': stock_amount, 
+            'Yesterday\'s Stock': yesterdays_stock,
+            'Total Stock': total_stock
         })
-        st.success('Product updated successfully')
+    stock_df = pd.DataFrame(stock_table_data)
+    st.write(stock_df)
 
-    # Add a button to download the updated products table as a CSV file
-    products_df = pd.DataFrame.from_dict(products, orient='index')
-    download_href = create_download_link(products_df)
-    st.markdown(download_href, unsafe_allow_html=True)
+    # Edit the stock table
+    if st.button('Edit Stock Table'):
+        st.write('Edit functionality not implemented yet')
+
+
+
+
 
 
 
@@ -163,6 +162,65 @@ def customer_details():
         total_bills_due = customer_df['Amount Due'].sum()
         st.write
 
+def display_stock_table():
+    st.subheader('Stock Table')
+    product_refs = db.collection('products').get()
+    product_names = [product_ref.id for product_ref in product_refs]
+
+    stock_table_data = []
+    for product_name in product_names:
+        product_ref = db.collection('products').document(product_name)
+        product_data = product_ref.get().to_dict()
+        stock_amount = product_data.get('stock_amount', 0)
+        yesterdays_stock = product_data.get('yesterdays_stock', 0)
+        total_stock = stock_amount + yesterdays_stock
+        stock_table_data.append({
+            'Product': product_name,
+            'Stock Amount': f"{stock_amount} Kg",
+            'Yesterday\'s Stock': f"{yesterdays_stock} Kg",
+            'Total Stock': f"{total_stock} Kg"
+        })
+    stock_df = pd.DataFrame(stock_table_data)
+    st.write(stock_df)
+
+def edit_stock():
+    with st.form(key='edit_stock_form'):
+        product_names = [product_ref.id for product_ref in db.collection('products').get()]
+        selected_product_name = st.selectbox('Select a product to edit', options=product_names)
+
+        product_ref = db.collection('products').document(selected_product_name)
+        product_data = product_ref.get().to_dict()
+
+        stock_amount = st.number_input(f"{selected_product_name} Stock Amount", min_value=0, step=1, value=product_data.get('stock_amount', 0))
+        yesterdays_stock = st.number_input(f"{selected_product_name} Yesterday's Stock", min_value=0, step=1, value=product_data.get('yesterdays_stock', 0))
+
+        submit_button = st.form_submit_button('Save Edited Stock Data')
+
+    if submit_button:
+        product_ref.set({
+            'stock_amount': stock_amount,
+            'yesterdays_stock': yesterdays_stock
+        })
+        st.success('Stock data updated successfully')
+        display_stock_table()
+
+def add_product():
+    with st.form(key='add_product_form'):
+        new_product_name = st.text_input('Enter new product name')
+        stock_amount = st.number_input('Stock Amount', min_value=0, step=1)
+        yesterdays_stock = st.number_input('Yesterday\'s Stock', min_value=0, step=1)
+        submit_button = st.form_submit_button('Add New Product')
+
+    if submit_button:
+        product_ref = db.collection('products').document(new_product_name)
+        product_ref.set({
+            'stock_amount': stock_amount,
+            'yesterdays_stock': yesterdays_stock
+        })
+        st.success('New product added successfully')
+        display_stock_table()
+
+
 
 
 
@@ -218,9 +276,12 @@ def home():
     # Show the appropriate section based on the user's choice
     if choice == 'Products':
         st.write('Here you can view a list of all products')
-        products_df = create_products_table()
-        st.write(products_df)
-        edit_products()
+        #collect_stock_data()
+        display_stock_table()
+        if st.button('Edit Stock'):
+            edit_stock()
+        if st.button('Add More Types of Products into Inventory'):
+            add_product()
 
     elif choice == 'Prices':
         st.header('Prices')
