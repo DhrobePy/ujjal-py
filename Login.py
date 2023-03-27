@@ -126,7 +126,9 @@ def orders_due_today():
 
     orders_list = []
     for order in orders:
-        orders_list.append(order.to_dict())
+        order_data = order.to_dict()
+        order_data["id"] = order.id  # Add the order ID to the dictionary
+        orders_list.append(order_data)
 
     due_orders = {}
     for order in orders_list:
@@ -360,41 +362,50 @@ def home():
     
             for customer, products in due_orders.items():
                 st.write(f"Customer: {customer}")
+                order_ids = []
                 for product, order in products.items():
-                    st.write(f"Product: {product}")
-                    st.write(f"Quantity in 50kg bags: {order['quantity_50kg']}")
-                    st.write(f"Quantity in 74kg bags: {order['quantity_74kg']}")
-                    st.write("---")
+                    order_ids.append(order["id"])  # Add the order IDs to the list
     
-                    order_id = st.text_input(f"Order ID to update for {customer} - {product}", "")
-                    if order_id:
-                        delivered_50kg = st.number_input(f"Delivered quantity in 50kg bags for {customer} - {product}", 0)
-                        delivered_74kg = st.number_input(f"Delivered quantity in 74kg bags for {customer} - {product}", 0)
+                selected_order_id = st.selectbox(f"Select order for {customer}", order_ids)
+                selected_order = None
+                for product, order in products.items():
+                    if order["id"] == selected_order_id:
+                        selected_order = order
+                        st.write(f"Product: {product}")
+                        st.write(f"Quantity in 50kg bags: {order['quantity_50kg']}")
+                        st.write(f"Quantity in 74kg bags: {order['quantity_74kg']}")
+                        break
     
-                        if st.button(f"Update Order for {customer} - {product}"):
-                            remaining_50kg = order['quantity_50kg'] - delivered_50kg
-                            remaining_74kg = order['quantity_74kg'] - delivered_74kg
-                            update_data = {
-                                "quantity_50kg": remaining_50kg,
-                                "quantity_74kg": remaining_74kg,
-                            }
-                            update_order(order_id, update_data)
+                if selected_order:
+                    delivered_50kg = st.number_input(f"Delivered quantity in 50kg bags for {customer}", 0)
+                    delivered_74kg = st.number_input(f"Delivered quantity in 74kg bags for {customer}", 0)
     
-                            receivable_data = {
-                                "customer": customer,
-                                "product": product,
-                                "delivered_50kg": delivered_50kg,
-                                "delivered_74kg": delivered_74kg,
-                                "amount": order['quotation_price'] * (delivered_50kg + delivered_74kg),
-                            }
-                            add_to_receivables(receivable_data)
-                            st.success(f"Order updated for {customer} - {product}")
+                    if st.button(f"Update Order for {customer}"):
+                        remaining_50kg = selected_order['quantity_50kg'] - delivered_50kg
+                        remaining_74kg = selected_order['quantity_74kg'] - delivered_74kg
+                        update_data = {
+                            "quantity_50kg": remaining_50kg,
+                            "quantity_74kg": remaining_74kg,
+                        }
+                        update_order(selected_order_id, update_data)
     
-                            if remaining_50kg == 0 and remaining_74kg == 0:
-                                orders_ref.document(order_id).delete()
-                                st.success(f"Order removed from orders due list for {customer} - {product}")
+                        receivable_data = {
+                            "customer": customer,
+                            "product": product,
+                            "delivered_50kg": delivered_50kg,
+                            "delivered_74kg": delivered_74kg,
+                            "amount": selected_order['quotation_price'] * (delivered_50kg + delivered_74kg),
+                        }
+                        add_to_receivables(receivable_data)
+                        st.success(f"Order updated for {customer} - {product}")
+    
+                        if remaining_50kg == 0 and remaining_74kg == 0:
+                            orders_ref.document(selected_order_id).delete()
+                            st.success(f"Order removed from orders due list for {customer} - {product}")
         else:
             st.write("No orders due today.")
+
+        
     
 
     #elif choice == 'Orders Due':
