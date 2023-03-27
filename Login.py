@@ -117,9 +117,12 @@ def order_form():
 
 
 def orders_due_today():
-    today = date.today()
+    now = datetime.now()
+    today_start = datetime.combine(now.date(), time())
+    today_end = today_start + timedelta(days=1)
+
     orders_ref = db.collection("orders")
-    orders = orders_ref.where("delivery_date", "==", today).stream()
+    orders = orders_ref.where("delivery_date", ">=", today_start).where("delivery_date", "<", today_end).stream()
 
     orders_list = []
     for order in orders:
