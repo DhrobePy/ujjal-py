@@ -78,8 +78,56 @@ def collect_stock_data():
     if st.button('Edit Stock Table'):
         st.write('Edit functionality not implemented yet')
 
+def add_order(order_data):
+    orders_ref = db.collection('orders')
+    orders_ref.add(order_data)
 
 
+def order_form():
+    st.subheader("Add Order")
+    product = st.text_input("Product")
+    delivery_date = st.date_input("Delivery Date")
+    quotation_price = st.number_input("Quotation Price", value=0.0)
+    quantity_50kg = st.number_input("Quantity in 50kg Bags", value=0)
+    quantity_74kg = st.number_input("Quantity in 74kg Bags", value=0)
+    customer = st.text_input("Customer Name")
+
+    if st.button("Submit Order"):
+        order_data = {
+            "product": product,
+            "delivery_date": delivery_date,
+            "quotation_price": quotation_price,
+            "quantity_50kg": quantity_50kg,
+            "quantity_74kg": quantity_74kg,
+            "customer": customer,
+        }
+        add_order(order_data)
+        st.success("Order added successfully!")
+
+
+def orders_due_today():
+    today = date.today()
+    orders_ref = db.collection("orders")
+    orders = orders_ref.where("delivery_date", "==", today).stream()
+
+    orders_list = []
+    for order in orders:
+        orders_list.append(order.to_dict())
+
+    due_orders = {}
+    for order in orders_list:
+        customer = order['customer']
+        product = order['product']
+        if customer not in due_orders:
+            due_orders[customer] = {}
+
+        if product not in due_orders[customer]:
+            due_orders[customer][product] = order
+        else:
+            due_orders[customer][product]['quantity_50kg'] += order['quantity_50kg']
+            due_orders[customer][product]['quantity_74kg'] += order['quantity_74kg']
+
+    return due_orders
 
 
 
@@ -286,9 +334,28 @@ def home():
     elif choice == 'Prices':
         st.header('Prices')
         st.write('Here you can view and update prices for different products')
+    
     elif choice == 'Orders Due':
         st.header('Orders Due')
-        st.write('Here you can view a list of all pending orders')
+        st.write('Here you can view a list of all pending orders and add new orders')
+        order_form()
+    
+        due_orders = orders_due_today()
+        if due_orders:
+            st.subheader("Orders due today:")
+            for customer, products in due_orders.items():
+                st.write(f"Customer: {customer}")
+                for product, order in products.items():
+                    st.write(f"Product: {product}")
+                    st.write(f"Quantity in 50kg bags: {order['quantity_50kg']}")
+                    st.write(f"Quantity in 74kg bags: {order['quantity_74kg']}")
+                    st.write("---")
+        else:
+            st.write("No orders due today.")
+
+    #elif choice == 'Orders Due':
+        #st.header('Orders Due')
+        #st.write('Here you can view a list of all pending orders')
     elif choice=='Bills Receivables':
         st.header('Bills receivables')
         customer_details()
