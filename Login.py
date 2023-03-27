@@ -83,10 +83,13 @@ def add_order(order_data):
     orders_ref.add(order_data)
 
 
+from datetime import datetime, time
+
 def order_form():
     st.subheader("Add Order")
     product = st.text_input("Product")
     delivery_date = st.date_input("Delivery Date")
+    delivery_datetime = datetime.combine(delivery_date, time())  # Convert date to datetime
     quotation_price = st.number_input("Quotation Price", value=0.0)
     quantity_50kg = st.number_input("Quantity in 50kg Bags", value=0)
     quantity_74kg = st.number_input("Quantity in 74kg Bags", value=0)
@@ -95,7 +98,7 @@ def order_form():
     if st.button("Submit Order"):
         order_data = {
             "product": product,
-            "delivery_date": delivery_date,
+            "delivery_date": delivery_datetime,  # Store the datetime object
             "quotation_price": quotation_price,
             "quantity_50kg": quantity_50kg,
             "quantity_74kg": quantity_74kg,
