@@ -175,6 +175,21 @@ def customer_details_form():
 def add_customer_to_database(customer_data):
     db.collection("customers").add(customer_data)
 
+def display_all_customer_details():
+    st.subheader("All Customer Details")
+
+    customer_data = get_all_customer_info()
+    if customer_data:
+        st.table(pd.DataFrame(customer_data))
+    else:
+        st.write("No customer details found.")
+
+def get_all_customer_info():
+    customers = db.collection("customers").stream()
+    customer_data = [customer.to_dict() for customer in customers]
+    return customer_data
+
+
 
 def order_due_form():
     st.subheader("Submit Order")
@@ -428,6 +443,7 @@ def home():
     elif choice=='Bills Receivables':
         st.header('Bills receivables')
         customer_details_form()
+        display_all_customer_details()
 
     elif choice == 'Orders Due':
         st.header('Orders Due')
