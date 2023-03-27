@@ -189,6 +189,35 @@ def get_all_customer_info():
     customer_data = [customer.to_dict() for customer in customers]
     return customer_data
 
+def search_customer_by_name():
+    search_name = st.text_input("Search by name", "")
+    if search_name:
+        customer_data = search_customer_data("customer_name", search_name)
+        if customer_data:
+            st.table(pd.DataFrame(customer_data))
+        else:
+            st.write("No customers found with this name.")
+
+def search_customer_by_region():
+    regions = get_all_regions()
+    selected_region = st.selectbox("Select a region", regions)
+    customer_data = search_customer_data("region", selected_region)
+    if customer_data:
+        st.table(pd.DataFrame(customer_data))
+    else:
+        st.write(f"No customers found in the {selected_region} region.")
+
+def search_customer_data(field, value):
+    customers = db.collection("customers").where(field, "==", value).stream()
+    customer_data = [customer.to_dict() for customer in customers]
+    return customer_data
+
+def get_all_regions():
+    customers = db.collection("customers").stream()
+    regions = set(customer.to_dict()["region"] for customer in customers)
+    return list(regions)
+
+
 
 
 def order_due_form():
@@ -374,6 +403,54 @@ def add_product():
         display_stock_table()
 
 
+def show_add_customer_form():
+    st.write("Add a New Customer")
+    customer_details_form()
+
+def get_customer_info(customer_name):
+    customers = db.collection("customers").where("customer_name", "==", customer_name).stream()
+    customer_info = None
+    for customer in customers:
+        customer_info = customer.to_dict()
+        customer_info["id"] = customer.id  # Add the document ID to the customer_info dictionary
+        break
+    return customer_info
+def show_edit_customer_form():
+    st.write("Edit Customer Details")
+    customer_name = st.selectbox("Select a Customer", get_customer_names())
+    customer_info = get_customer_info(customer_name)
+    if customer_info:
+        edit_customer_details(customer_info)
+    else:
+        st.write("No customer found with this name.")
+
+def edit_customer_details(customer_info):
+    customer_id = customer_info['id']
+    customer_name = st.text_input("Customer Name", customer_info['customer_name'])
+    region = st.text_input("Region", customer_info['region'])
+    address = st.text_input("Address", customer_info['address'])
+    contact_info = st.text_input("Contact Info", customer_info['contact_info'])
+    contract_status = st.selectbox("Contract Status", ["Active", "Inactive"], index=("Active" == customer_info['contract_status']))
+    previous_due = st.number_input("Previous Due", value=customer_info['previous_due'])
+    order_in_que = st.number_input("Order in Que", value=customer_info['order_in_que'])
+    total_receivables = st.number_input("Total Receivables", value=customer_info['total_receivables'])
+
+    if st.button("Update Customer Details"):
+        updated_customer_data = {
+            "customer_name": customer_name,
+            "region": region,
+            "address": address,
+            "contact_info": contact_info,
+            "contract_status": contract_status,
+            "previous_due": previous_due,
+            "order_in_que": order_in_que,
+            "total_receivables": total_receivables,
+        }
+        update_customer_in_database(customer_id, updated_customer_data)
+        st.success("Customer details updated successfully.")
+
+def update_customer_in_database(customer_id, updated_customer_data):
+    db.collection("customers").document(customer_id).update(updated_customer_data)
 
 
 
@@ -419,12 +496,11 @@ def home():
     # Add a horizontal navigation bar for the Home page
     #st.write('Navigation')
     choice = option_menu(
-        options=['Products', 'Prices', 'Orders Due', 'Bills Receivables', 'Bills Payables'],
+        options=['Products', 'List of Clients','Prices', 'Orders Due', 'Bills Receivables', 'Bills Payables'],
         menu_title=None,
         menu_icon='cast',
         orientation='horizontal')
-    #options = ['Products', 'Prices', 'Order Due', 'Bills Due']
-    #choice = st.radio('', options)
+    
 
     # Show the appropriate section based on the user's choice
     if choice == 'Products':
@@ -436,6 +512,22 @@ def home():
         if st.button('Add More Types of Products into Inventory'):
             add_product()
 
+
+    elif choice == 'List of Clients':
+        st.header('List of Clients')
+        client_filter = st.selectbox("Filter by", ["Name", "Region", "All"])
+        if client_filter == "Name":
+            search_customer_by_name()
+        elif client_filter == "Region":
+            search_customer_by_region()
+        else:
+            display_all_customer_details()
+        if st.button("Add Customer"):
+            show_add_customer_form()
+        if st.button("Edit Customer Details"):
+            show_edit_customer_form()
+
+        
     elif choice == 'Prices':
         st.header('Prices')
         st.write('Here you can view and update prices for different products')
