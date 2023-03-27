@@ -146,6 +146,80 @@ def orders_due_today():
     return due_orders
 
 
+def customer_details_form():
+    st.subheader("Customer Details")
+
+    customer_name = st.text_input("Customer Name", "")
+    region = st.text_input("Region", "")
+    address = st.text_input("Address", "")
+    contact_info = st.text_input("Contact Info", "")
+    contract_status = st.selectbox("Contract Status", ["Active", "Inactive"])
+    previous_due = st.number_input("Previous Due", 0)
+    order_in_que = st.number_input("Order in Que", 0)
+    total_receivables = st.number_input("Total Receivables", 0)
+
+    if st.button("Save Customer Details"):
+        customer_data = {
+            "customer_name": customer_name,
+            "region": region,
+            "address": address,
+            "contact_info": contact_info,
+            "contract_status": contract_status,
+            "previous_due": previous_due,
+            "order_in_que": order_in_que,
+            "total_receivables": total_receivables,
+        }
+        add_customer_to_database(customer_data)
+        st.success("Customer details saved successfully.")
+
+def add_customer_to_database(customer_data):
+    db.collection("customers").add(customer_data)
+
+
+def order_due_form():
+    st.subheader("Submit Order")
+
+    customer_name = st.selectbox("Customer Name", get_customer_names())
+    display_customer_info(customer_name)
+
+    product = st.selectbox("Product", ["50kg bag", "74kg bag"])
+    price_quotation = st.number_input("Price Quotation", 0)
+    quantity = st.number_input("Quantity", 0)
+    due_date = st.date_input("Order Due Date")
+    payment_method = st.selectbox("Payment Method", ["Cash", "Credit"])
+
+    if st.button("Submit Order"):
+        order_data = {
+            "customer_name": customer_name,
+            "product": product,
+            "price_quotation": price_quotation,
+            "quantity": quantity,
+            "due_date": due_date,
+            "payment_method": payment_method,
+        }
+        submit_order_to_database(order_data)
+        st.success("Order submitted successfully.")
+
+def display_customer_info(customer_name):
+    customer_info = get_customer_info(customer_name)
+    if customer_info:
+        st.table(pd.DataFrame(customer_info, index=[0]))
+
+def get_customer_names():
+    customers = db.collection("customers").stream()
+    customer_names = [customer.to_dict()["customer_name"] for customer in customers]
+    return customer_names
+
+def get_customer_info(customer_name):
+    customers = db.collection("customers").where("customer_name", "==", customer_name).stream()
+    customer_info = None
+    for customer in customers:
+        customer_info = customer.to_dict()
+        break
+    return customer_info
+
+def submit_order_to_database(order_data):
+    db.collection("orders").add(order_data)
 
 
 def customer_details():
@@ -351,69 +425,23 @@ def home():
         st.header('Prices')
         st.write('Here you can view and update prices for different products')
     
+    elif choice=='Bills Receivables':
+        st.header('Bills receivables')
+        customer_details_form()
+
     elif choice == 'Orders Due':
         st.header('Orders Due')
-        st.write('Here you can view a list of all pending orders and add new orders')
-        order_form()
-        
-        due_orders = orders_due_today()
-        if due_orders:
-            st.subheader("Orders due today:")
-    
-            for customer, products in due_orders.items():
-                st.write(f"Customer: {customer}")
-                order_ids = []
-                for product, order in products.items():
-                    order_ids.append(order["id"])  # Add the order IDs to the list
-    
-                selected_order_id = st.selectbox(f"Select order for {customer}", order_ids)
-                selected_order = None
-                for product, order in products.items():
-                    if order["id"] == selected_order_id:
-                        selected_order = order
-                        st.write(f"Product: {product}")
-                        st.write(f"Quantity in 50kg bags: {order['quantity_50kg']}")
-                        st.write(f"Quantity in 74kg bags: {order['quantity_74kg']}")
-                        break
-    
-                if selected_order:
-                    delivered_50kg = st.number_input(f"Delivered quantity in 50kg bags for {customer}", 0)
-                    delivered_74kg = st.number_input(f"Delivered quantity in 74kg bags for {customer}", 0)
-    
-                    if st.button(f"Update Order for {customer}"):
-                        remaining_50kg = selected_order['quantity_50kg'] - delivered_50kg
-                        remaining_74kg = selected_order['quantity_74kg'] - delivered_74kg
-                        update_data = {
-                            "quantity_50kg": remaining_50kg,
-                            "quantity_74kg": remaining_74kg,
-                        }
-                        update_order(selected_order_id, update_data)
-    
-                        receivable_data = {
-                            "customer": customer,
-                            "product": product,
-                            "delivered_50kg": delivered_50kg,
-                            "delivered_74kg": delivered_74kg,
-                            "amount": selected_order['quotation_price'] * (delivered_50kg + delivered_74kg),
-                        }
-                        add_to_receivables(receivable_data)
-                        st.success(f"Order updated for {customer} - {product}")
-    
-                        if remaining_50kg == 0 and remaining_74kg == 0:
-                            orders_ref.document(selected_order_id).delete()
-                            st.success(f"Order removed from orders due list for {customer} - {product}")
-        else:
-            st.write("No orders due today.")
+        st.write('Here you can view a list of all pending orders')
+        order_due_form()
 
-        
     
 
     #elif choice == 'Orders Due':
         #st.header('Orders Due')
         #st.write('Here you can view a list of all pending orders')
-    elif choice=='Bills Receivables':
-        st.header('Bills receivables')
-        customer_details()
+    #elif choice=='Bills Receivables':
+        #st.header('Bills receivables')
+        #customer_details()
     elif choice == 'Bills Payables':
         st.header('Bills Due')
         st.write('Here you can view a list of all pending bills')
