@@ -82,6 +82,14 @@ def add_order(order_data):
     orders_ref = db.collection('orders')
     orders_ref.add(order_data)
 
+def update_order(order_id, order_data):
+    orders_ref = db.collection('orders')
+    orders_ref.document(order_id).update(order_data)
+
+def add_to_receivables(receivable_data):
+    receivables_ref = db.collection('receivables')
+    receivables_ref.add(receivable_data)
+
 
 from datetime import datetime, time
 
@@ -342,10 +350,11 @@ def home():
         st.header('Orders Due')
         st.write('Here you can view a list of all pending orders and add new orders')
         order_form()
-    
+        
         due_orders = orders_due_today()
         if due_orders:
             st.subheader("Orders due today:")
+    
             for customer, products in due_orders.items():
                 st.write(f"Customer: {customer}")
                 for product, order in products.items():
@@ -353,8 +362,37 @@ def home():
                     st.write(f"Quantity in 50kg bags: {order['quantity_50kg']}")
                     st.write(f"Quantity in 74kg bags: {order['quantity_74kg']}")
                     st.write("---")
+    
+                    order_id = st.text_input(f"Order ID to update for {customer} - {product}", "")
+                    if order_id:
+                        delivered_50kg = st.number_input(f"Delivered quantity in 50kg bags for {customer} - {product}", 0)
+                        delivered_74kg = st.number_input(f"Delivered quantity in 74kg bags for {customer} - {product}", 0)
+    
+                        if st.button(f"Update Order for {customer} - {product}"):
+                            remaining_50kg = order['quantity_50kg'] - delivered_50kg
+                            remaining_74kg = order['quantity_74kg'] - delivered_74kg
+                            update_data = {
+                                "quantity_50kg": remaining_50kg,
+                                "quantity_74kg": remaining_74kg,
+                            }
+                            update_order(order_id, update_data)
+    
+                            receivable_data = {
+                                "customer": customer,
+                                "product": product,
+                                "delivered_50kg": delivered_50kg,
+                                "delivered_74kg": delivered_74kg,
+                                "amount": order['quotation_price'] * (delivered_50kg + delivered_74kg),
+                            }
+                            add_to_receivables(receivable_data)
+                            st.success(f"Order updated for {customer} - {product}")
+    
+                            if remaining_50kg == 0 and remaining_74kg == 0:
+                                orders_ref.document(order_id).delete()
+                                st.success(f"Order removed from orders due list for {customer} - {product}")
         else:
             st.write("No orders due today.")
+    
 
     #elif choice == 'Orders Due':
         #st.header('Orders Due')
