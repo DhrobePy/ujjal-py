@@ -3,7 +3,7 @@ from streamlit_option_menu import option_menu
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, date
 import base64
 import streamlit_lottie as st_lottie
 import requests
