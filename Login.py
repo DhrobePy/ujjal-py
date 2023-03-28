@@ -12,6 +12,13 @@ import altair as alt
 import plotly.express as px
 
 
+cred = credentials.Certificate("expenses_updated.json")
+firebase_admin.initialize_app(cred)
+
+# Get a reference to the Firestore database
+db = firestore.client()
+
+
 
 
 with open('download_button.json', 'r') as f:
@@ -457,11 +464,7 @@ def update_customer_in_database(customer_id, updated_customer_data):
 
 
 
-cred = credentials.Certificate("expenses_updated.json")
-#firebase_admin.initialize_app(cred)
 
-# Get a reference to the Firestore database
-db = firestore.client()
 
 
 import pandas as pd
