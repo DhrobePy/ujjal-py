@@ -12,7 +12,7 @@ import altair as alt
 import plotly.express as px
 
 
-cred = credentials.Certificate("expenses_updated.json")
+cred = credentials.Certificate("exensefinal.json")
 #firebase_admin.initialize_app(cred)
 
 # Get a reference to the Firestore database
